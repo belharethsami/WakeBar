@@ -120,6 +120,11 @@ final class ClosedLidController: ObservableObject {
         defaults.set(requested, forKey: Self.requestedKey)
     }
 
+    func setRequestedForCurrentLaunch(_ requested: Bool) {
+        lastError = nil
+        isRequested = requested
+    }
+
     func installSupport() {
         lastError = nil
 

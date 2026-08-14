@@ -9,6 +9,8 @@ Before opening a pull request, run:
 ```sh
 make test
 make integration-test
+# Requires the one-time Closed-Lid Support installation:
+make closed-lid-integration-test
 ```
 
 Changes to session behavior should include a focused unit test. Changes to the

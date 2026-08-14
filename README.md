@@ -81,6 +81,13 @@ To exercise the complete process lifecycle against macOS power assertions:
 make integration-test
 ```
 
+After installing Closed-Lid Support, exercise the real `SleepDisabled`
+lifecycle, timed cleanup, and simulated-crash watchdog recovery with:
+
+```sh
+make closed-lid-integration-test
+```
+
 An offscreen UI snapshot can be rendered without Screen Recording permission:
 
 ```sh

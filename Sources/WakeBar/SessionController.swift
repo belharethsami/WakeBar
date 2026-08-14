@@ -28,7 +28,7 @@ final class SessionController: ObservableObject {
         }
 
         if startupOptions.usesClosedLidMode {
-            closedLid.setRequested(true)
+            closedLid.setRequestedForCurrentLaunch(true)
         }
 
         if startupOptions.shouldStart {

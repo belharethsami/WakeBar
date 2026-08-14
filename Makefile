@@ -1,4 +1,4 @@
-.PHONY: build test app dmg preview integration-test clean
+.PHONY: build test app dmg preview integration-test closed-lid-integration-test clean
 
 build:
 	swift build
@@ -17,6 +17,9 @@ preview:
 
 integration-test:
 	./scripts/run-integration-test.sh
+
+closed-lid-integration-test:
+	./scripts/run-closed-lid-integration-test.sh
 
 clean:
 	swift package clean
