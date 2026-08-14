@@ -61,6 +61,50 @@ let invalidOptions = StartupOptions.parse(["--start-for", "not-a-number"])
 expect(!invalidOptions.shouldStart, "Invalid durations should not start a session")
 expect(invalidOptions.duration == nil, "Invalid durations should stay nil")
 
+expect(
+    ClosedLidSupport.isValidAccountName("samibelhareth"),
+    "Normal macOS account names should be accepted"
+)
+expect(
+    !ClosedLidSupport.isValidAccountName("unsafe user"),
+    "Whitespace must not be accepted in privileged configuration input"
+)
+expect(
+    !ClosedLidSupport.isValidAccountName("user;touch-pwned"),
+    "Shell metacharacters must not be accepted in privileged configuration input"
+)
+expect(
+    ClosedLidSupport.sudoersRule(for: "samibelhareth")
+        == "samibelhareth ALL=(root) NOPASSWD: /usr/bin/pmset -a disablesleep 0, /usr/bin/pmset -a disablesleep 1\n",
+    "The sudoers grant must contain only the two exact pmset commands"
+)
+expect(
+    ClosedLidSupport.sudoersRule(for: "unsafe user") == nil,
+    "Invalid account names must not produce a sudoers rule"
+)
+expect(
+    ClosedLidSupport.sudoArguments(enable: true)
+        == ["-n", "/usr/bin/pmset", "-a", "disablesleep", "1"],
+    "Closed-lid enable should use non-interactive sudo and the fixed pmset path"
+)
+expect(
+    ClosedLidSupport.sudoArguments(enable: false)
+        == ["-n", "/usr/bin/pmset", "-a", "disablesleep", "0"],
+    "Closed-lid disable should use non-interactive sudo and the fixed pmset path"
+)
+expect(
+    ClosedLidSupport.parseSleepDisabledState(from: #""SleepDisabled" = Yes"#) == .enabled,
+    "IORegistry enabled state should be recognized"
+)
+expect(
+    ClosedLidSupport.parseSleepDisabledState(from: #""SleepDisabled" = No"#) == .disabled,
+    "IORegistry disabled state should be recognized"
+)
+expect(
+    ClosedLidSupport.parseSleepDisabledState(from: "unrelated output") == .unknown,
+    "Missing system state should not be guessed"
+)
+
 var calendar = Calendar(identifier: .gregorian)
 calendar.timeZone = TimeZone(secondsFromGMT: 0)!
 
