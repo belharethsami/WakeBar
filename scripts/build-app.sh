@@ -8,6 +8,7 @@ dist_dir="$project_dir/dist"
 app_bundle="$dist_dir/WakeBar.app"
 contents_dir="$app_bundle/Contents"
 resources_dir="$contents_dir/Resources"
+helpers_dir="$contents_dir/Helpers"
 macos_dir="$contents_dir/MacOS"
 arm_scratch="$project_dir/.build-arm64"
 x86_scratch="$project_dir/.build-x86_64"
@@ -17,6 +18,12 @@ swift build \
     --scratch-path "$arm_scratch" \
     -c "$configuration" \
     --product WakeBar \
+    --triple arm64-apple-macosx13.0
+swift build \
+    --package-path "$project_dir" \
+    --scratch-path "$arm_scratch" \
+    -c "$configuration" \
+    --product WakeBarGuard \
     --triple arm64-apple-macosx13.0
 arm_bin_dir=$(swift build \
     --package-path "$project_dir" \
@@ -32,6 +39,12 @@ swift build \
     -c "$configuration" \
     --product WakeBar \
     --triple x86_64-apple-macosx13.0
+swift build \
+    --package-path "$project_dir" \
+    --scratch-path "$x86_scratch" \
+    -c "$configuration" \
+    --product WakeBarGuard \
+    --triple x86_64-apple-macosx13.0
 x86_bin_dir=$(swift build \
     --package-path "$project_dir" \
     --scratch-path "$x86_scratch" \
@@ -46,12 +59,16 @@ if [[ "$app_bundle" != "$project_dir/dist/WakeBar.app" ]]; then
 fi
 
 rm -rf "$app_bundle"
-mkdir -p "$macos_dir" "$resources_dir"
+mkdir -p "$macos_dir" "$resources_dir" "$helpers_dir"
 
 lipo -create \
     "$arm_bin_dir/WakeBar" \
     "$x86_bin_dir/WakeBar" \
     -output "$macos_dir/WakeBar"
+lipo -create \
+    "$arm_bin_dir/WakeBarGuard" \
+    "$x86_bin_dir/WakeBarGuard" \
+    -output "$helpers_dir/WakeBarGuard"
 cp "$project_dir/Resources/Info.plist" "$contents_dir/Info.plist"
 
 icon_work=$(mktemp -d /tmp/wakebar-icon.XXXXXX)
@@ -69,6 +86,7 @@ for size in 16 32 128 256 512; do
 done
 
 iconutil -c icns "$icon_work/WakeBar.iconset" -o "$resources_dir/WakeBar.icns"
+codesign --force --sign - "$helpers_dir/WakeBarGuard"
 codesign --force --deep --sign - "$app_bundle"
 
 print "$app_bundle"

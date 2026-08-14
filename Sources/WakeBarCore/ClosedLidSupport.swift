@@ -6,6 +6,16 @@ public enum SleepDisabledState: Equatable, Sendable {
     case unknown
 }
 
+public struct BatteryStatus: Equatable, Sendable {
+    public let percentage: Int?
+    public let isOnACPower: Bool
+
+    public init(percentage: Int?, isOnACPower: Bool) {
+        self.percentage = percentage
+        self.isOnACPower = isOnACPower
+    }
+}
+
 public enum ClosedLidSupport {
     public static let pmsetPath = "/usr/bin/pmset"
     public static let sudoPath = "/usr/bin/sudo"
@@ -80,6 +90,19 @@ public enum ClosedLidSupport {
         }
 
         return .unknown
+    }
+
+    public static func parseBatteryStatus(from output: String) -> BatteryStatus {
+        let isOnACPower = output.localizedCaseInsensitiveContains("AC Power")
+        let percentage: Int?
+
+        if let match = output.range(of: #"\b([0-9]{1,3})%"#, options: .regularExpression) {
+            percentage = Int(output[match].dropLast())
+        } else {
+            percentage = nil
+        }
+
+        return BatteryStatus(percentage: percentage, isOnACPower: isOnACPower)
     }
 
     public static func supportDirectory(homeDirectory: URL) -> URL {

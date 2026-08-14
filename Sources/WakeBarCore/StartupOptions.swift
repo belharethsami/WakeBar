@@ -4,17 +4,20 @@ public struct StartupOptions: Equatable {
     public var shouldStart = false
     public var duration: TimeInterval?
     public var keepsDisplayAwake = false
+    public var usesClosedLidMode = false
     public var quitsAfterSession = false
 
     public init(
         shouldStart: Bool = false,
         duration: TimeInterval? = nil,
         keepsDisplayAwake: Bool = false,
+        usesClosedLidMode: Bool = false,
         quitsAfterSession: Bool = false
     ) {
         self.shouldStart = shouldStart
         self.duration = duration
         self.keepsDisplayAwake = keepsDisplayAwake
+        self.usesClosedLidMode = usesClosedLidMode
         self.quitsAfterSession = quitsAfterSession
     }
 
@@ -42,6 +45,9 @@ public struct StartupOptions: Equatable {
 
             case "--keep-display-awake":
                 options.keepsDisplayAwake = true
+
+            case "--closed-lid":
+                options.usesClosedLidMode = true
 
             case "--quit-after-session":
                 options.quitsAfterSession = true

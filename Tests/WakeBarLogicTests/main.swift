@@ -50,11 +50,13 @@ expect(
 let options = StartupOptions.parse([
     "--start-for", "12.5",
     "--keep-display-awake",
+    "--closed-lid",
     "--quit-after-session"
 ])
 expect(options.shouldStart, "--start-for should enable auto-start")
 expect(options.duration == 12.5, "--start-for should parse fractional seconds")
 expect(options.keepsDisplayAwake, "Display option should be parsed")
+expect(options.usesClosedLidMode, "Closed-lid option should be parsed")
 expect(options.quitsAfterSession, "Quit option should be parsed")
 
 let invalidOptions = StartupOptions.parse(["--start-for", "not-a-number"])
@@ -127,6 +129,18 @@ expect(
 expect(
     ClosedLidSupport.parseSleepDisabledState(from: "unrelated output") == .unknown,
     "Missing system state should not be guessed"
+)
+expect(
+    ClosedLidSupport.parseBatteryStatus(
+        from: "Now drawing from 'Battery Power'\n -InternalBattery-0 92%; discharging"
+    ) == BatteryStatus(percentage: 92, isOnACPower: false),
+    "Battery status should identify a discharging percentage"
+)
+expect(
+    ClosedLidSupport.parseBatteryStatus(
+        from: "Now drawing from 'AC Power'\n -InternalBattery-0 100%; charged"
+    ) == BatteryStatus(percentage: 100, isOnACPower: true),
+    "Battery status should identify external power"
 )
 let testHome = URL(fileURLWithPath: "/Users/tester", isDirectory: true)
 expect(

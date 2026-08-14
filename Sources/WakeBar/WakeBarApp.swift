@@ -1,9 +1,25 @@
 import SwiftUI
 
+@MainActor
+final class WakeBarApplicationDelegate: NSObject, NSApplicationDelegate {
+    static weak var sessionController: SessionController?
+
+    func applicationWillTerminate(_ notification: Notification) {
+        Self.sessionController?.shutdownBeforeTermination()
+    }
+}
+
 @main
 struct WakeBarApp: App {
-    @StateObject private var session = SessionController()
+    @NSApplicationDelegateAdaptor(WakeBarApplicationDelegate.self) private var appDelegate
+    @StateObject private var session: SessionController
     @StateObject private var launchAtLogin = LaunchAtLoginController()
+
+    init() {
+        let sessionController = SessionController()
+        _session = StateObject(wrappedValue: sessionController)
+        WakeBarApplicationDelegate.sessionController = sessionController
+    }
 
     var body: some Scene {
         MenuBarExtra {

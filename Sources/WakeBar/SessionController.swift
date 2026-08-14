@@ -12,6 +12,8 @@ final class SessionController: ObservableObject {
     @Published private(set) var keepsDisplayAwake: Bool
     @Published private(set) var lastError: String?
 
+    let closedLid: ClosedLidController
+
     private var caffeinateProcess: Process?
     private var deadlineTask: Task<Void, Never>?
     private var currentSessionID: UUID?
@@ -20,6 +22,14 @@ final class SessionController: ObservableObject {
     init(startupOptions: StartupOptions = .current) {
         keepsDisplayAwake = startupOptions.keepsDisplayAwake
         quitsAfterSession = startupOptions.quitsAfterSession
+        closedLid = ClosedLidController()
+        closedLid.onSafetyStop = { [weak self] reason in
+            self?.handleClosedLidSafetyStop(reason)
+        }
+
+        if startupOptions.usesClosedLidMode {
+            closedLid.setRequested(true)
+        }
 
         if startupOptions.shouldStart {
             let duration = startupOptions.duration
@@ -31,7 +41,16 @@ final class SessionController: ObservableObject {
 
     func start(for duration: TimeInterval?) {
         stopCurrentProcess()
+        closedLid.endSession()
         lastError = nil
+
+        do {
+            try closedLid.activateForSession()
+        } catch {
+            lastError = error.localizedDescription
+            resetSessionState()
+            return
+        }
 
         let safeDuration = duration.map { max(1, $0) }
         let command = CaffeinateCommand(
@@ -71,6 +90,7 @@ final class SessionController: ObservableObject {
                 endDate = nil
             }
         } catch {
+            closedLid.endSession()
             lastError = "Could not start caffeinate: \(error.localizedDescription)"
             resetSessionState()
         }
@@ -83,6 +103,7 @@ final class SessionController: ObservableObject {
 
     func stop() {
         stopCurrentProcess()
+        closedLid.endSession()
         resetSessionState()
     }
 
@@ -135,6 +156,7 @@ final class SessionController: ObservableObject {
     private func finishTimedSession(sessionID: UUID) {
         guard currentSessionID == sessionID else { return }
         stopCurrentProcess()
+        closedLid.endSession()
         resetSessionState()
 
         if quitsAfterSession {
@@ -151,6 +173,7 @@ final class SessionController: ObservableObject {
         currentSessionID = nil
         isActive = false
         endDate = nil
+        closedLid.endSession()
 
         if terminationStatus != 0 {
             lastError = "caffeinate stopped unexpectedly (status \(terminationStatus))."
@@ -176,5 +199,18 @@ final class SessionController: ObservableObject {
         currentSessionID = nil
         isActive = false
         endDate = nil
+    }
+
+    func shutdownBeforeTermination() {
+        stopCurrentProcess()
+        closedLid.endSession()
+        resetSessionState()
+    }
+
+    private func handleClosedLidSafetyStop(_ reason: String) {
+        stopCurrentProcess()
+        closedLid.endSession()
+        resetSessionState()
+        lastError = reason
     }
 }
