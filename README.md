@@ -8,11 +8,12 @@ WakeBar is a small, native, open-source macOS menu-bar app that keeps your Mac
 awake by wrapping Apple's built-in `/usr/bin/caffeinate` command.
 
 It is intentionally modest: no account, no network connection, no analytics,
-no privileged helper, and no third-party dependencies.
+and no third-party dependencies. Ordinary sessions need no elevated access;
+Closed-Lid Mode is optional and separately authorized.
 
 ## Features
 
-- One-click sessions for 15 minutes, 30 minutes, 1 hour, 2 hours, or indefinitely
+- One-click sessions for 15 or 30 minutes; 1, 2, 3, 4, 6, or 10 hours; or indefinitely
 - Keep awake until a chosen time (today, or tomorrow if that time has passed)
 - Optional display-sleep prevention
 - Optional closed-lid sessions, including on battery without an external display
@@ -49,8 +50,9 @@ awake Mac in a bag; sustained workloads need adequate ventilation.
 
 ## Install
 
-Download the latest DMG from [GitHub Releases](https://github.com/belharethsami/WakeBar/releases/latest),
-open it, and drag WakeBar into Applications.
+See [INSTALL.md](INSTALL.md) for step-by-step instructions using either the
+latest DMG or a local source build. In short: open the DMG, drag WakeBar into
+Applications, then launch it from Applications.
 
 Release builds must be signed and notarized before general distribution. Until
 the first notarized release is available, build WakeBar from source or ask your

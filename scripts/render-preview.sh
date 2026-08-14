@@ -12,6 +12,7 @@ xcrun swiftc \
     -parse-as-library \
     "$project_dir/Sources/WakeBarCore/CaffeinateCommand.swift" \
     "$project_dir/Sources/WakeBarCore/ClosedLidSupport.swift" \
+    "$project_dir/Sources/WakeBarCore/SessionDurationPreset.swift" \
     "$project_dir/Sources/WakeBarCore/SessionSchedule.swift" \
     "$project_dir/Sources/WakeBarCore/StartupOptions.swift" \
     "$project_dir/Sources/WakeBar/SessionController.swift" \

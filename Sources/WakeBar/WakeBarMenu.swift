@@ -1,11 +1,8 @@
 import AppKit
 import SwiftUI
-
-private struct DurationPreset: Identifiable {
-    let id = UUID()
-    let title: String
-    let seconds: TimeInterval
-}
+#if canImport(WakeBarCore)
+import WakeBarCore
+#endif
 
 struct WakeBarMenu: View {
     @ObservedObject var session: SessionController
@@ -13,14 +10,11 @@ struct WakeBarMenu: View {
 
     @State private var selectedEndTime = Date().addingTimeInterval(60 * 60)
 
-    private let presets = [
-        DurationPreset(title: "15 min", seconds: 15 * 60),
-        DurationPreset(title: "30 min", seconds: 30 * 60),
-        DurationPreset(title: "1 hour", seconds: 60 * 60),
-        DurationPreset(title: "2 hours", seconds: 2 * 60 * 60)
-    ]
+    private let presets = SessionDurationPreset.standard
 
     private let columns = [
+        GridItem(.flexible(), spacing: 8),
+        GridItem(.flexible(), spacing: 8),
         GridItem(.flexible(), spacing: 8),
         GridItem(.flexible(), spacing: 8)
     ]
@@ -42,6 +36,7 @@ struct WakeBarMenu: View {
                             session.start(for: preset.seconds)
                         }
                         .frame(maxWidth: .infinity)
+                        .accessibilityLabel("Start a \(preset.title) session")
                     }
                 }
 

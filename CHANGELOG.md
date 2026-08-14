@@ -10,6 +10,8 @@ All notable changes to WakeBar will be documented here.
 - Added a user-level heartbeat watchdog for crash recovery.
 - Added automatic shutdown at 20 percent battery and in Low Power Mode.
 - Added closed-lid status, warnings, installation, and removal controls.
+- Added 3-, 4-, 6-, and 10-hour one-click session presets.
+- Added detailed release, source-build, update, and removal instructions.
 
 ## 0.1.0 — 2026-08-13
 
