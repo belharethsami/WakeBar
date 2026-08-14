@@ -1,10 +1,15 @@
 .PHONY: build test app dmg preview integration-test closed-lid-integration-test clean
 
+SWIFTPM_FLAGS :=
+ifeq ($(WAKEBAR_DISABLE_SWIFTPM_SANDBOX),1)
+SWIFTPM_FLAGS += --disable-sandbox
+endif
+
 build:
-	swift build
+	swift build $(SWIFTPM_FLAGS)
 
 test:
-	swift run WakeBarLogicTests
+	swift run $(SWIFTPM_FLAGS) WakeBarLogicTests
 
 app:
 	./scripts/build-app.sh

@@ -12,20 +12,28 @@ helpers_dir="$contents_dir/Helpers"
 macos_dir="$contents_dir/MacOS"
 arm_scratch="$project_dir/.build-arm64"
 x86_scratch="$project_dir/.build-x86_64"
+swiftpm_flags=()
+
+if [[ "${WAKEBAR_DISABLE_SWIFTPM_SANDBOX:-0}" == "1" ]]; then
+    swiftpm_flags+=(--disable-sandbox)
+fi
 
 swift build \
+    "${swiftpm_flags[@]}" \
     --package-path "$project_dir" \
     --scratch-path "$arm_scratch" \
     -c "$configuration" \
     --product WakeBar \
     --triple arm64-apple-macosx13.0
 swift build \
+    "${swiftpm_flags[@]}" \
     --package-path "$project_dir" \
     --scratch-path "$arm_scratch" \
     -c "$configuration" \
     --product WakeBarGuard \
     --triple arm64-apple-macosx13.0
 arm_bin_dir=$(swift build \
+    "${swiftpm_flags[@]}" \
     --package-path "$project_dir" \
     --scratch-path "$arm_scratch" \
     -c "$configuration" \
@@ -34,18 +42,21 @@ arm_bin_dir=$(swift build \
     --show-bin-path)
 
 swift build \
+    "${swiftpm_flags[@]}" \
     --package-path "$project_dir" \
     --scratch-path "$x86_scratch" \
     -c "$configuration" \
     --product WakeBar \
     --triple x86_64-apple-macosx13.0
 swift build \
+    "${swiftpm_flags[@]}" \
     --package-path "$project_dir" \
     --scratch-path "$x86_scratch" \
     -c "$configuration" \
     --product WakeBarGuard \
     --triple x86_64-apple-macosx13.0
 x86_bin_dir=$(swift build \
+    "${swiftpm_flags[@]}" \
     --package-path "$project_dir" \
     --scratch-path "$x86_scratch" \
     -c "$configuration" \
@@ -70,22 +81,7 @@ lipo -create \
     "$x86_bin_dir/WakeBarGuard" \
     -output "$helpers_dir/WakeBarGuard"
 cp "$project_dir/Resources/Info.plist" "$contents_dir/Info.plist"
-
-icon_work=$(mktemp -d /tmp/wakebar-icon.XXXXXX)
-trap 'rm -rf "$icon_work"' EXIT
-
-xcrun swift "$project_dir/scripts/generate-icon.swift" "$icon_work/icon_1024x1024.png"
-mkdir -p "$icon_work/WakeBar.iconset"
-
-for size in 16 32 128 256 512; do
-    sips -z "$size" "$size" "$icon_work/icon_1024x1024.png" \
-        --out "$icon_work/WakeBar.iconset/icon_${size}x${size}.png" >/dev/null
-    retina_size=$((size * 2))
-    sips -z "$retina_size" "$retina_size" "$icon_work/icon_1024x1024.png" \
-        --out "$icon_work/WakeBar.iconset/icon_${size}x${size}@2x.png" >/dev/null
-done
-
-iconutil -c icns "$icon_work/WakeBar.iconset" -o "$resources_dir/WakeBar.icns"
+cp "$project_dir/Resources/WakeBar.icns" "$resources_dir/WakeBar.icns"
 codesign --force --sign - "$helpers_dir/WakeBarGuard"
 codesign --force --deep --sign - "$app_bundle"
 
