@@ -20,11 +20,11 @@ struct WakeBarMenuRenderer {
         .preferredColorScheme(.light)
 
         let hostingView = NSHostingView(rootView: rootView)
-        hostingView.frame = NSRect(x: 0, y: 0, width: 320, height: 560)
+        hostingView.frame = NSRect(x: 0, y: 0, width: 350, height: 720)
         hostingView.layoutSubtreeIfNeeded()
 
         let fittingHeight = max(500, ceil(hostingView.fittingSize.height))
-        hostingView.frame = NSRect(x: 0, y: 0, width: 320, height: fittingHeight)
+        hostingView.frame = NSRect(x: 0, y: 0, width: 350, height: fittingHeight)
         hostingView.wantsLayer = true
         hostingView.layer?.backgroundColor = NSColor.windowBackgroundColor.cgColor
 

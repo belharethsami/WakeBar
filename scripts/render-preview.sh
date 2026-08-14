@@ -11,9 +11,14 @@ trap 'rm -f "$renderer"' EXIT
 xcrun swiftc \
     -parse-as-library \
     "$project_dir/Sources/WakeBarCore/CaffeinateCommand.swift" \
+    "$project_dir/Sources/WakeBarCore/ClosedLidSupport.swift" \
     "$project_dir/Sources/WakeBarCore/SessionSchedule.swift" \
     "$project_dir/Sources/WakeBarCore/StartupOptions.swift" \
     "$project_dir/Sources/WakeBar/SessionController.swift" \
+    "$project_dir/Sources/WakeBar/AdministrativeAuthorization.swift" \
+    "$project_dir/Sources/WakeBar/ClosedLidController.swift" \
+    "$project_dir/Sources/WakeBar/ClosedLidSection.swift" \
+    "$project_dir/Sources/WakeBar/FixedCommandRunner.swift" \
     "$project_dir/Sources/WakeBar/LaunchAtLoginController.swift" \
     "$project_dir/Sources/WakeBar/WakeBarMenu.swift" \
     "$project_dir/scripts/render-menu.swift" \

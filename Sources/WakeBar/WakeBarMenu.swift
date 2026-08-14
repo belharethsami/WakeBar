@@ -74,6 +74,11 @@ struct WakeBarMenu: View {
                 )
             )
 
+            ClosedLidSection(
+                controller: session.closedLid,
+                sessionIsActive: session.isActive
+            )
+
             if session.isActive {
                 Button("End Session", role: .destructive) {
                     session.stop()
@@ -124,7 +129,7 @@ struct WakeBarMenu: View {
             }
         }
         .padding(16)
-        .frame(width: 320)
+        .frame(width: 350)
         .onAppear {
             launchAtLogin.refresh()
         }
