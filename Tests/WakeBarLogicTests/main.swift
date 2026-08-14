@@ -82,6 +82,30 @@ expect(
     ClosedLidSupport.sudoersRule(for: "unsafe user") == nil,
     "Invalid account names must not produce a sudoers rule"
 )
+let installCommand = ClosedLidSupport.authorizationInstallCommand(
+    for: "samibelhareth",
+    nonce: "1234-ABCD"
+)
+expect(installCommand != nil, "A valid account and nonce should produce an install command")
+expect(
+    installCommand?.contains("/usr/sbin/visudo -cf") == true,
+    "The authorization installer must validate its sudoers file"
+)
+expect(
+    installCommand?.contains("/bin/chmod 0440") == true,
+    "The authorization installer must restrict sudoers file permissions"
+)
+expect(
+    installCommand?.contains("samibelhareth ALL=") == false,
+    "The account-specific rule should be encoded instead of interpolated into shell syntax"
+)
+expect(
+    ClosedLidSupport.authorizationInstallCommand(
+        for: "samibelhareth",
+        nonce: "unsafe;command"
+    ) == nil,
+    "Unsafe installer nonces must be rejected"
+)
 expect(
     ClosedLidSupport.sudoArguments(enable: true)
         == ["-n", "/usr/bin/pmset", "-a", "disablesleep", "1"],
@@ -103,6 +127,17 @@ expect(
 expect(
     ClosedLidSupport.parseSleepDisabledState(from: "unrelated output") == .unknown,
     "Missing system state should not be guessed"
+)
+let testHome = URL(fileURLWithPath: "/Users/tester", isDirectory: true)
+expect(
+    ClosedLidSupport.ownershipMarkerURL(homeDirectory: testHome).path
+        == "/Users/tester/Library/Application Support/WakeBar/closed-lid-owned",
+    "The watchdog ownership marker should use the user's Application Support directory"
+)
+expect(
+    ClosedLidSupport.heartbeatURL(homeDirectory: testHome).path
+        == "/Users/tester/Library/Application Support/WakeBar/closed-lid-heartbeat",
+    "The watchdog heartbeat should use the user's Application Support directory"
 )
 
 var calendar = Calendar(identifier: .gregorian)

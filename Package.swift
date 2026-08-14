@@ -9,6 +9,7 @@ let package = Package(
     ],
     products: [
         .executable(name: "WakeBar", targets: ["WakeBar"]),
+        .executable(name: "WakeBarGuard", targets: ["WakeBarGuard"]),
         .executable(name: "WakeBarLogicTests", targets: ["WakeBarLogicTests"])
     ],
     targets: [
@@ -20,6 +21,11 @@ let package = Package(
             name: "WakeBar",
             dependencies: ["WakeBarCore"],
             path: "Sources/WakeBar"
+        ),
+        .executableTarget(
+            name: "WakeBarGuard",
+            dependencies: ["WakeBarCore"],
+            path: "Sources/WakeBarGuard"
         ),
         .executableTarget(
             name: "WakeBarLogicTests",
