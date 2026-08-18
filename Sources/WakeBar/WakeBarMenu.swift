@@ -15,7 +15,6 @@ struct WakeBarMenu: View {
     private let columns = [
         GridItem(.flexible(), spacing: 8),
         GridItem(.flexible(), spacing: 8),
-        GridItem(.flexible(), spacing: 8),
         GridItem(.flexible(), spacing: 8)
     ]
 
@@ -68,6 +67,14 @@ struct WakeBarMenu: View {
                     set: { session.setKeepsDisplayAwake($0) }
                 )
             )
+
+            Text(
+                session.keepsDisplayAwake
+                    ? "WakeBar is preventing display sleep for this session."
+                    : "Display sleep is allowed and follows the normal macOS timer."
+            )
+            .font(.caption2)
+            .foregroundStyle(.secondary)
 
             ClosedLidSection(
                 controller: session.closedLid,

@@ -2,6 +2,14 @@
 
 All notable changes to WakeBar will be documented here.
 
+## 0.2.1 — 2026-08-17
+
+- Added a 12-hour one-click session preset.
+- Fixed active display-sleep changes so the previous `caffeinate -d` assertion
+  is fully released without cycling Closed-Lid Mode.
+- Clarified when the display follows the normal macOS sleep timer.
+- Added closed-lid integration coverage that rejects display-sleep assertions.
+
 ## 0.2.0 — 2026-08-13
 
 - Added an explicitly opt-in Closed-Lid Mode backed by `pmset disablesleep`.

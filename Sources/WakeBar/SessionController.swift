@@ -53,33 +53,10 @@ final class SessionController: ObservableObject {
         }
 
         let safeDuration = duration.map { max(1, $0) }
-        let command = CaffeinateCommand(
-            duration: safeDuration,
-            keepsDisplayAwake: keepsDisplayAwake,
-            parentProcessIdentifier: ProcessInfo.processInfo.processIdentifier
-        )
-        let process = Process()
         let sessionID = UUID()
 
-        process.executableURL = CaffeinateCommand.executableURL
-        process.arguments = command.arguments
-        process.standardInput = FileHandle.nullDevice
-        process.standardOutput = FileHandle.nullDevice
-        process.standardError = FileHandle.nullDevice
-        process.terminationHandler = { [weak self] process in
-            let processIdentifier = process.processIdentifier
-            let terminationStatus = process.terminationStatus
-            Task { @MainActor [weak self] in
-                self?.processDidExit(
-                    processIdentifier: processIdentifier,
-                    terminationStatus: terminationStatus
-                )
-            }
-        }
-
         do {
-            try process.run()
-            caffeinateProcess = process
+            try replaceCaffeinateProcess(duration: safeDuration)
             currentSessionID = sessionID
             isActive = true
 
@@ -113,9 +90,19 @@ final class SessionController: ObservableObject {
         let remainingDuration = endDate.map { max(1, $0.timeIntervalSinceNow) }
         let wasActive = isActive
         keepsDisplayAwake = enabled
+        lastError = nil
 
         if wasActive {
-            start(for: remainingDuration)
+            do {
+                // Replace only the assertion process. Cycling the entire
+                // session can leave an old display assertion alive while
+                // closed-lid support is disabled and re-enabled.
+                try replaceCaffeinateProcess(duration: remainingDuration)
+            } catch {
+                closedLid.endSession()
+                resetSessionState()
+                lastError = "Could not update display sleep behavior: \(error.localizedDescription)"
+            }
         }
     }
 
@@ -185,11 +172,48 @@ final class SessionController: ObservableObject {
         deadlineTask = nil
         currentSessionID = nil
 
+        terminateCaffeinateProcess()
+    }
+
+    private func replaceCaffeinateProcess(duration: TimeInterval?) throws {
+        terminateCaffeinateProcess()
+
+        let command = CaffeinateCommand(
+            duration: duration,
+            keepsDisplayAwake: keepsDisplayAwake,
+            parentProcessIdentifier: ProcessInfo.processInfo.processIdentifier
+        )
+        let process = Process()
+
+        process.executableURL = CaffeinateCommand.executableURL
+        process.arguments = command.arguments
+        process.standardInput = FileHandle.nullDevice
+        process.standardOutput = FileHandle.nullDevice
+        process.standardError = FileHandle.nullDevice
+        process.terminationHandler = { [weak self] process in
+            let processIdentifier = process.processIdentifier
+            let terminationStatus = process.terminationStatus
+            Task { @MainActor [weak self] in
+                self?.processDidExit(
+                    processIdentifier: processIdentifier,
+                    terminationStatus: terminationStatus
+                )
+            }
+        }
+
+        try process.run()
+        caffeinateProcess = process
+    }
+
+    private func terminateCaffeinateProcess() {
         let process = caffeinateProcess
         caffeinateProcess = nil
 
         if process?.isRunning == true {
             process?.terminate()
+            // Release the old display assertion before starting its
+            // replacement so an unchecked toggle takes effect immediately.
+            process?.waitUntilExit()
         }
     }
 

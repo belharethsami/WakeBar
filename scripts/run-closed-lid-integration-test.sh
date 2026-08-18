@@ -64,6 +64,18 @@ if ! sleep_is_disabled; then
     exit 1
 fi
 [[ -n "$caffeinate_pid" ]]
+command_line=$(ps -p "$caffeinate_pid" -o command=)
+[[ "$command_line" == *"-i"* ]]
+if [[ "$command_line" == *"-d"* ]]; then
+    print -u2 "Closed-lid session unexpectedly requested a display-sleep assertion."
+    exit 1
+fi
+assertions=$(pmset -g assertions)
+if print "$assertions" | rg -q "pid $caffeinate_pid\(caffeinate\).*PreventUserIdleDisplaySleep"; then
+    print -u2 "Closed-lid session unexpectedly prevented display sleep."
+    print -u2 "$assertions"
+    exit 1
+fi
 [[ -f "$marker" ]]
 [[ -f "$heartbeat" ]]
 [[ -x "$installed_guard" ]]
@@ -122,4 +134,4 @@ fi
 [[ ! -e "$marker" ]]
 [[ ! -e "$heartbeat" ]]
 
-print "Closed-lid integration test passed: enable verification, timed cleanup, and watchdog crash recovery."
+print "Closed-lid integration test passed: display sleep allowed, enable verification, timed cleanup, and watchdog crash recovery."

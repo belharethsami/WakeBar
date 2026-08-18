@@ -19,6 +19,7 @@ public struct SessionDurationPreset: Identifiable, Equatable, Sendable {
         SessionDurationPreset(title: "3 hr", seconds: 3 * 60 * 60),
         SessionDurationPreset(title: "4 hr", seconds: 4 * 60 * 60),
         SessionDurationPreset(title: "6 hr", seconds: 6 * 60 * 60),
-        SessionDurationPreset(title: "10 hr", seconds: 10 * 60 * 60)
+        SessionDurationPreset(title: "10 hr", seconds: 10 * 60 * 60),
+        SessionDurationPreset(title: "12 hr", seconds: 12 * 60 * 60)
     ]
 }

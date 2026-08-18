@@ -13,7 +13,7 @@ Closed-Lid Mode is optional and separately authorized.
 
 ## Features
 
-- One-click sessions for 15 or 30 minutes; 1, 2, 3, 4, 6, or 10 hours; or indefinitely
+- One-click sessions for 15 or 30 minutes; 1, 2, 3, 4, 6, 10, or 12 hours; or indefinitely
 - Keep awake until a chosen time (today, or tomorrow if that time has passed)
 - Optional display-sleep prevention
 - Optional closed-lid sessions, including on battery without an external display
@@ -24,7 +24,9 @@ Closed-Lid Mode is optional and separately authorized.
 
 WakeBar targets macOS 13 Ventura and newer. Standard sessions prevent idle
 sleep. Closed-Lid Mode additionally applies macOS's system-wide sleep override
-for the duration of a session.
+for the duration of a session. It does not prevent display sleep unless **Keep
+the display awake too** is enabled; otherwise, the display follows the normal
+macOS display-sleep timer.
 
 ## Closed-Lid Mode
 

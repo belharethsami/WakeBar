@@ -61,12 +61,12 @@ expect(options.quitsAfterSession, "Quit option should be parsed")
 
 expect(
     SessionDurationPreset.standard.map(\.seconds)
-        == [900, 1_800, 3_600, 7_200, 10_800, 14_400, 21_600, 36_000],
-    "Standard presets should include 15 and 30 minutes plus 1, 2, 3, 4, 6, and 10 hours"
+        == [900, 1_800, 3_600, 7_200, 10_800, 14_400, 21_600, 36_000, 43_200],
+    "Standard presets should include 15 and 30 minutes plus 1, 2, 3, 4, 6, 10, and 12 hours"
 )
 expect(
     SessionDurationPreset.standard.map(\.title)
-        == ["15 min", "30 min", "1 hr", "2 hr", "3 hr", "4 hr", "6 hr", "10 hr"],
+        == ["15 min", "30 min", "1 hr", "2 hr", "3 hr", "4 hr", "6 hr", "10 hr", "12 hr"],
     "Preset labels should remain compact and ordered by duration"
 )
 
