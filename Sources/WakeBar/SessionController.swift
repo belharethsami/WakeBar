@@ -26,6 +26,9 @@ final class SessionController: ObservableObject {
         closedLid.onSafetyStop = { [weak self] reason in
             self?.handleClosedLidSafetyStop(reason)
         }
+        closedLid.onLidClosed = { [weak self] in
+            self?.handleLidClosed()
+        }
 
         if startupOptions.usesClosedLidMode {
             closedLid.setRequestedForCurrentLaunch(true)
@@ -98,11 +101,31 @@ final class SessionController: ObservableObject {
                 // session can leave an old display assertion alive while
                 // closed-lid support is disabled and re-enabled.
                 try replaceCaffeinateProcess(duration: remainingDuration)
+
+                if !enabled, closedLid.isLidClosed {
+                    turnDisplayOffNow()
+                }
             } catch {
                 closedLid.endSession()
                 resetSessionState()
                 lastError = "Could not update display sleep behavior: \(error.localizedDescription)"
             }
+        }
+    }
+
+    func turnDisplayOffNow() {
+        guard isActive, !keepsDisplayAwake else { return }
+
+        let result = FixedCommandRunner.run(
+            executablePath: DisplaySleepCommand.executableURL.path,
+            arguments: DisplaySleepCommand.arguments
+        )
+
+        if result.terminationStatus != 0 {
+            let detail = result.output.trimmingCharacters(in: .whitespacesAndNewlines)
+            lastError = detail.isEmpty
+                ? "macOS could not turn the display off."
+                : "macOS could not turn the display off: \(detail)"
         }
     }
 
@@ -236,5 +259,10 @@ final class SessionController: ObservableObject {
         closedLid.endSession()
         resetSessionState()
         lastError = reason
+    }
+
+    private func handleLidClosed() {
+        guard closedLid.isActive, !keepsDisplayAwake else { return }
+        turnDisplayOffNow()
     }
 }

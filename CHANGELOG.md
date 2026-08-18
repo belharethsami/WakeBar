@@ -2,6 +2,14 @@
 
 All notable changes to WakeBar will be documented here.
 
+## 0.2.2 — 2026-08-17
+
+- Added clamshell-state monitoring during closed-lid sessions.
+- Explicitly turns the display off when the lid closes unless display-sleep
+  prevention is enabled.
+- Added a **Turn Display Off Now** control during display-allowed sessions.
+- Added repeat-close transition and fixed-command coverage.
+
 ## 0.2.1 — 2026-08-17
 
 - Added a 12-hour one-click session preset.

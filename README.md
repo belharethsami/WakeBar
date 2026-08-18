@@ -25,8 +25,10 @@ Closed-Lid Mode is optional and separately authorized.
 WakeBar targets macOS 13 Ventura and newer. Standard sessions prevent idle
 sleep. Closed-Lid Mode additionally applies macOS's system-wide sleep override
 for the duration of a session. It does not prevent display sleep unless **Keep
-the display awake too** is enabled; otherwise, the display follows the normal
-macOS display-sleep timer.
+the display awake too** is enabled. During a closed-lid session with that option
+off, WakeBar watches the clamshell state and explicitly turns the display off as
+the lid closes. The menu also provides **Turn Display Off Now** while a
+display-allowed session is active.
 
 ## Closed-Lid Mode
 
@@ -45,6 +47,11 @@ active, a user-level watchdog checks a 15-second heartbeat and restores normal
 sleep if WakeBar stops responding for 90 seconds. Normal sleep is also restored
 when the session ends, WakeBar quits, Low Power Mode is enabled, or battery
 charge reaches 20 percent while unplugged.
+
+When display sleep is allowed, WakeBar reads the root power-domain clamshell
+state through IOKit and invokes the documented, non-persistent
+`/usr/bin/pmset displaysleepnow` action on each open-to-closed transition. This
+keeps the display behavior separate from the system-sleep override.
 
 This mode is system-wide and requires administrator approval to install. A
 managed Mac may require IT to approve or deploy the rule. Never put a closed,

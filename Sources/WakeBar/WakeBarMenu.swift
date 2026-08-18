@@ -71,10 +71,18 @@ struct WakeBarMenu: View {
             Text(
                 session.keepsDisplayAwake
                     ? "WakeBar is preventing display sleep for this session."
-                    : "Display sleep is allowed and follows the normal macOS timer."
+                    : "Display sleep is allowed. In Closed-Lid Mode, WakeBar turns it off when the lid closes."
             )
             .font(.caption2)
             .foregroundStyle(.secondary)
+
+            if session.isActive && !session.keepsDisplayAwake {
+                Button("Turn Display Off Now") {
+                    session.turnDisplayOffNow()
+                }
+                .buttonStyle(.bordered)
+                .frame(maxWidth: .infinity)
+            }
 
             ClosedLidSection(
                 controller: session.closedLid,

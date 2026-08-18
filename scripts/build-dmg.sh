@@ -5,7 +5,7 @@ set -euo pipefail
 project_dir="${0:A:h:h}"
 dist_dir="$project_dir/dist"
 app_bundle="$dist_dir/WakeBar.app"
-dmg_path="$dist_dir/WakeBar-0.2.1.dmg"
+dmg_path="$dist_dir/WakeBar-0.2.2.dmg"
 
 "$project_dir/scripts/build-app.sh" >/dev/null
 

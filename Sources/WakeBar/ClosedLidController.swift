@@ -2,6 +2,7 @@ import AppKit
 import Combine
 import Darwin
 import Foundation
+import IOKit
 #if canImport(WakeBarCore)
 import WakeBarCore
 #endif
@@ -52,16 +53,21 @@ final class ClosedLidController: ObservableObject {
         percentage: nil,
         isOnACPower: false
     )
+    @Published private(set) var isLidClosed = false
     @Published private(set) var lastError: String?
     @Published private(set) var isRequested: Bool
 
     var onSafetyStop: ((String) -> Void)?
+    var onLidClosed: (() -> Void)?
 
     private let fileManager: FileManager
     private let defaults: UserDefaults
     private let homeDirectory: URL
+    private let powerRootDomain: io_service_t
     private var heartbeatTask: Task<Void, Never>?
     private var safetyTask: Task<Void, Never>?
+    private var clamshellTask: Task<Void, Never>?
+    private var clamshellTransitions = ClamshellTransitionDetector()
 
     private static let requestedKey = "wakebar.closedLid.requested"
 
@@ -72,12 +78,22 @@ final class ClosedLidController: ObservableObject {
         self.fileManager = fileManager
         self.defaults = defaults
         homeDirectory = fileManager.homeDirectoryForCurrentUser
+        powerRootDomain = IOServiceGetMatchingService(
+            kIOMainPortDefault,
+            IOServiceMatching("IOPMrootDomain")
+        )
         isRequested = defaults.bool(forKey: Self.requestedKey)
 
         refresh()
 
         if ownsSystemOverride {
             endSession()
+        }
+    }
+
+    deinit {
+        if powerRootDomain != 0 {
+            IOObjectRelease(powerRootDomain)
         }
     }
 
@@ -235,6 +251,7 @@ final class ClosedLidController: ObservableObject {
         isActive = true
         beginHeartbeat()
         beginSafetyMonitor()
+        beginClamshellMonitor()
     }
 
     func endSession() {
@@ -242,6 +259,10 @@ final class ClosedLidController: ObservableObject {
         heartbeatTask = nil
         safetyTask?.cancel()
         safetyTask = nil
+        clamshellTask?.cancel()
+        clamshellTask = nil
+        clamshellTransitions.reset()
+        isLidClosed = false
 
         guard ownsSystemOverride else {
             isActive = false
@@ -391,6 +412,44 @@ final class ClosedLidController: ObservableObject {
                 }
             }
         }
+    }
+
+    private func beginClamshellMonitor() {
+        clamshellTask?.cancel()
+        clamshellTransitions.reset()
+
+        clamshellTask = Task { @MainActor [weak self] in
+            while let self, self.isActive, !Task.isCancelled {
+                if let isClosed = self.readClamshellState() {
+                    self.isLidClosed = isClosed
+
+                    if self.clamshellTransitions.consume(isClosed: isClosed) {
+                        self.onLidClosed?()
+                    }
+                }
+
+                do {
+                    try await Task.sleep(for: .milliseconds(250))
+                } catch {
+                    return
+                }
+            }
+        }
+    }
+
+    private func readClamshellState() -> Bool? {
+        guard powerRootDomain != 0,
+              let property = IORegistryEntryCreateCFProperty(
+                  powerRootDomain,
+                  "AppleClamshellState" as CFString,
+                  kCFAllocatorDefault,
+                  0
+              )
+        else {
+            return nil
+        }
+
+        return property.takeRetainedValue() as? Bool
     }
 
     private func triggerSafetyStop(_ reason: String) {

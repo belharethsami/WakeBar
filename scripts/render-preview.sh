@@ -11,6 +11,7 @@ trap 'rm -f "$renderer"' EXIT
 xcrun swiftc \
     -parse-as-library \
     "$project_dir/Sources/WakeBarCore/CaffeinateCommand.swift" \
+    "$project_dir/Sources/WakeBarCore/ClamshellDisplaySleep.swift" \
     "$project_dir/Sources/WakeBarCore/ClosedLidSupport.swift" \
     "$project_dir/Sources/WakeBarCore/SessionDurationPreset.swift" \
     "$project_dir/Sources/WakeBarCore/SessionSchedule.swift" \

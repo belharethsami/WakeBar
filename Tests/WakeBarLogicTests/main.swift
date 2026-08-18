@@ -47,6 +47,37 @@ expect(
     "Timed display sessions should add both the display assertion and rounded timeout"
 )
 
+expect(
+    DisplaySleepCommand.executableURL.path == "/usr/bin/pmset",
+    "Display sleep should use Apple's fixed pmset executable"
+)
+expect(
+    DisplaySleepCommand.arguments == ["displaysleepnow"],
+    "Display sleep should use the non-persistent displaysleepnow action"
+)
+
+var clamshellTransitions = ClamshellTransitionDetector()
+expect(
+    !clamshellTransitions.consume(isClosed: false),
+    "An initially open lid should not request display sleep"
+)
+expect(
+    clamshellTransitions.consume(isClosed: true),
+    "Closing the lid should request display sleep"
+)
+expect(
+    !clamshellTransitions.consume(isClosed: true),
+    "A closed lid should not repeatedly request display sleep"
+)
+expect(
+    !clamshellTransitions.consume(isClosed: false),
+    "Reopening the lid should rearm the transition detector"
+)
+expect(
+    clamshellTransitions.consume(isClosed: true),
+    "Closing the lid again should request display sleep again"
+)
+
 let options = StartupOptions.parse([
     "--start-for", "12.5",
     "--keep-display-awake",
