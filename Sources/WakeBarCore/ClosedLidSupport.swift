@@ -22,6 +22,15 @@ public enum ClosedLidSupport {
     public static let sudoersPath = "/private/etc/sudoers.d/wakebar_closed_lid"
     public static let launchAgentLabel = "app.wakebar.closed-lid-guard"
     public static let watchdogStaleInterval: TimeInterval = 90
+    public static let batteryFloor = 5
+
+    public static func shouldStopForLowBattery(_ status: BatteryStatus) -> Bool {
+        guard !status.isOnACPower, let percentage = status.percentage else {
+            return false
+        }
+
+        return percentage <= batteryFloor
+    }
 
     public static func isValidAccountName(_ accountName: String) -> Bool {
         guard let first = accountName.first,

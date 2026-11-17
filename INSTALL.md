@@ -35,7 +35,7 @@ launch it from there. The local build is ad-hoc signed for development; managed
 Macs may still require IT approval.
 
 To create the drag-to-Applications disk image locally, run `make dmg`. The
-result is written to `dist/WakeBar-0.2.0.dmg`.
+result is written to `dist/WakeBar-0.2.3.dmg`.
 
 ## Optional closed-lid support
 
@@ -49,7 +49,8 @@ need a session to continue after closing the laptop lid:
 
 Closed-Lid Mode changes a system-wide sleep setting while active. WakeBar's
 watchdog restores normal sleep if the app stops responding, and WakeBar stops
-the mode at 20 percent battery or when Low Power Mode is enabled. Never put a
+the mode at 5 percent battery while unplugged. Closed-Lid Mode works above
+5 percent on battery, including with Low Power Mode enabled. Never put a
 closed, awake Mac in a bag.
 
 ## Update or remove WakeBar

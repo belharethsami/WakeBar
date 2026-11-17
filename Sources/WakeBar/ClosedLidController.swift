@@ -12,7 +12,6 @@ enum ClosedLidControllerError: LocalizedError {
     case watchdogUnavailable(String)
     case stateUnavailable
     case externallyManaged
-    case lowPowerMode
     case batteryTooLow(Int)
     case commandFailed(String)
     case verificationFailed
@@ -27,8 +26,6 @@ enum ClosedLidControllerError: LocalizedError {
             "WakeBar could not verify the current macOS sleep-disabled state."
         case .externallyManaged:
             "System sleep is already disabled by another tool. WakeBar will not take ownership of it."
-        case .lowPowerMode:
-            "Closed-lid mode is unavailable while Low Power Mode is enabled."
         case .batteryTooLow(let percentage):
             "Closed-lid mode requires more than \(percentage)% battery when unplugged."
         case .commandFailed(let detail):
@@ -43,7 +40,7 @@ enum ClosedLidControllerError: LocalizedError {
 
 @MainActor
 final class ClosedLidController: ObservableObject {
-    static let batteryFloor = 20
+    static let batteryFloor = ClosedLidSupport.batteryFloor
 
     @Published private(set) var helperInstalled = false
     @Published private(set) var watchdogInstalled = false
@@ -208,12 +205,7 @@ final class ClosedLidController: ObservableObject {
         guard helperInstalled else {
             throw ClosedLidControllerError.authorizationNotInstalled
         }
-        guard !ProcessInfo.processInfo.isLowPowerModeEnabled else {
-            throw ClosedLidControllerError.lowPowerMode
-        }
-        if !batteryStatus.isOnACPower,
-           let percentage = batteryStatus.percentage,
-           percentage <= Self.batteryFloor {
+        if ClosedLidSupport.shouldStopForLowBattery(batteryStatus) {
             throw ClosedLidControllerError.batteryTooLow(Self.batteryFloor)
         }
         guard systemState != .unknown else {
@@ -391,14 +383,8 @@ final class ClosedLidController: ObservableObject {
             while let self, self.isActive, !Task.isCancelled {
                 self.refreshBatteryStatus()
 
-                if ProcessInfo.processInfo.isLowPowerModeEnabled {
-                    self.triggerSafetyStop("WakeBar ended closed-lid mode because Low Power Mode was enabled.")
-                    return
-                }
-
-                if !self.batteryStatus.isOnACPower,
-                   let percentage = self.batteryStatus.percentage,
-                   percentage <= Self.batteryFloor {
+                if ClosedLidSupport.shouldStopForLowBattery(self.batteryStatus),
+                   let percentage = self.batteryStatus.percentage {
                     self.triggerSafetyStop(
                         "WakeBar ended closed-lid mode at \(percentage)% battery."
                     )

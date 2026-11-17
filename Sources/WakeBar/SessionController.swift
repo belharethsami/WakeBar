@@ -187,6 +187,9 @@ final class SessionController: ObservableObject {
 
         if terminationStatus != 0 {
             lastError = "caffeinate stopped unexpectedly (status \(terminationStatus))."
+        } else if quitsAfterSession {
+            // caffeinate's timeout can finish before the UI deadline task.
+            NSApplication.shared.terminate(nil)
         }
     }
 

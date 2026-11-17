@@ -48,7 +48,7 @@ struct ClosedLidSection: View {
                 .font(.caption2)
                 .foregroundStyle(.secondary)
 
-                Text("Safety cutoff: \(ClosedLidController.batteryFloor)% battery or Low Power Mode. Never place an awake, closed Mac in a bag.")
+                Text("Safety cutoff: \(ClosedLidController.batteryFloor)% battery when unplugged. Low Power Mode is supported. Never place an awake, closed Mac in a bag.")
                     .font(.caption2)
                     .foregroundStyle(.orange)
                     .fixedSize(horizontal: false, vertical: true)

@@ -18,5 +18,5 @@ packaged app should preserve `LSUIElement`, the fixed caffeinate path, and the
 parent-process watch that prevents orphaned assertions.
 
 Closed-lid changes must also preserve exact sudoers arguments, `visudo`
-validation, kernel-state verification, heartbeat cleanup, the battery floor,
-and Low Power Mode cutoff.
+validation, kernel-state verification, heartbeat cleanup, and the 5 percent
+battery floor while unplugged. Low Power Mode must not block closed-lid sessions.

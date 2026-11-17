@@ -2,6 +2,13 @@
 
 All notable changes to WakeBar will be documented here.
 
+## 0.2.3 — 2026-11-16
+
+- Allow closed-lid sessions above 5 percent battery, including in Low Power Mode.
+- Keep automatic session shutdown at or below 5 percent while unplugged.
+- Share the battery cutoff between session startup and monitoring, with boundary coverage.
+- Honor `--quit-after-session` when caffeinate's timeout finishes before the app timer.
+
 ## 0.2.2 — 2026-08-17
 
 - Added clamshell-state monitoring during closed-lid sessions.

@@ -184,6 +184,35 @@ expect(
     ) == BatteryStatus(percentage: 100, isOnACPower: true),
     "Battery status should identify external power"
 )
+for percentage in [6, 19, 20, 21, 100] {
+    expect(
+        !ClosedLidSupport.shouldStopForLowBattery(
+            BatteryStatus(percentage: percentage, isOnACPower: false)
+        ),
+        "Closed-lid sessions should be allowed above 5% battery (\(percentage)%)"
+    )
+}
+for percentage in [0, 4, 5] {
+    expect(
+        ClosedLidSupport.shouldStopForLowBattery(
+            BatteryStatus(percentage: percentage, isOnACPower: false)
+        ),
+        "Closed-lid sessions should stop at or below 5% battery (\(percentage)%)"
+    )
+    expect(
+        !ClosedLidSupport.shouldStopForLowBattery(
+            BatteryStatus(percentage: percentage, isOnACPower: true)
+        ),
+        "External power should permit closed-lid sessions even at \(percentage)% battery"
+    )
+}
+expect(
+    !ClosedLidSupport.shouldStopForLowBattery(
+        BatteryStatus(percentage: nil, isOnACPower: false)
+    ),
+    "A missing battery percentage should retain the existing behavior"
+)
+
 let testHome = URL(fileURLWithPath: "/Users/tester", isDirectory: true)
 expect(
     ClosedLidSupport.ownershipMarkerURL(homeDirectory: testHome).path

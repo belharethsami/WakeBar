@@ -45,8 +45,9 @@ account to run only these two commands without another prompt:
 WakeBar verifies the kernel's `SleepDisabled` state after every change. While
 active, a user-level watchdog checks a 15-second heartbeat and restores normal
 sleep if WakeBar stops responding for 90 seconds. Normal sleep is also restored
-when the session ends, WakeBar quits, Low Power Mode is enabled, or battery
-charge reaches 20 percent while unplugged.
+when the session ends, WakeBar quits, or battery charge reaches 5 percent while
+unplugged. Closed-Lid Mode works above 5 percent on battery, including when
+Low Power Mode is enabled.
 
 When display sleep is allowed, WakeBar reads the root power-domain clamshell
 state through IOKit and invokes the documented, non-persistent
